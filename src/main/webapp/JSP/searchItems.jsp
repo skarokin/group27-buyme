@@ -82,28 +82,30 @@
 
     <h2>Search Results:</h2>
     <% if (!searchResults.isEmpty()) { %>
-        <ul>
-        <% for (Map<String, Object> item : searchResults) { %>
-            <li style="margin-bottom: 40px;">
-                <%= item.get("title") %><br>
-                Initial Price: $<%= item.get("initialPrice") %><br>
-                Highest Bid: $<%= item.get("highestBid") %><br>
-                <% if (!item.get("ownerID").equals(loggedInUserId)) { %>
-                    <form action="searchItems.jsp" method="post">
-                        <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
-                        <input type="number" name="bidAmount" step="0.01" required>
-                        <input type="submit" value="Place Bid">
-                    </form>
-                <% } else { %>
-                    <form action="deleteItem.jsp" method="post">
-                        <input type="hidden" name="itemID" value="<%= item.get("itemID") %>">
-                        <input type="submit" value="Delete Listing" onclick="return confirm('Are you sure you want to delete this listing?');">
-                    </form>
-                <% } %>
-                <a href="viewBidHistory.jsp?itemID=<%=item.get("itemID")%>" class="button-link">View Bids</a>
-            </li>
-        <% } %>
-    </ul>
+<ul>
+    <% for (Map<String, Object> item : searchResults) { %>
+        <li style="margin-bottom: 40px;">
+            <%= item.get("title") %><br>
+            Initial Price: $<%= item.get("initialPrice") %><br>
+            Highest Bid: $<%= item.get("highestBid") %><br>
+            <% if (!item.get("ownerID").equals(loggedInUserId)) { %>
+                <!-- Form updated to include optional automatic bidding -->
+                <form action="searchIt.jsp" method="post">
+                    <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
+                    Bid Amount: <input type="number" name="bidAmount" step="0.01" required><br>
+                    Auto-Bid Limit: <input type="number" name="autoBidLimit" step="0.01" placeholder="Optional: Your max limit"><br>
+                    <input type="submit" value="Place Bid / Set Auto-Bid">
+                </form>
+            <% } else { %>
+                <form action="deleteItem.jsp" method="post">
+                    <input type="hidden" name="itemID" value="<%= item.get("itemID") %>">
+                    <input type="submit" value="Delete Listing" onclick="return confirm('Are you sure you want to delete this listing?');">
+                </form>
+            <% } %>
+            <a href="viewBidHistory.jsp?itemID=<%=item.get("itemID")%>" class="button-link">View Bids</a>
+        </li>
+    <% } %>
+</ul>
 <% } else { %>
     <p>No results found.</p>
 <% } %>

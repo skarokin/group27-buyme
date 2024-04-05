@@ -83,7 +83,6 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `chatID` int NOT NULL,
   `senderUserID` int NOT NULL,
   `message` text NOT NULL,
-  `messageNumber` int NOT NULL,
   `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_chatID` FOREIGN KEY (`chatID`) REFERENCES `chat` (`chatID`),
   CONSTRAINT `fk_senderUserID` FOREIGN KEY (`senderUserID`) REFERENCES `users` (`userID`)
