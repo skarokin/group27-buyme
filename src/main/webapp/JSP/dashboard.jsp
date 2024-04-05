@@ -66,6 +66,7 @@
         <input type="hidden" name="userID" value="<%= userId %>">
         <button type="submit" class="action-button">View My Bids/Auctions</button>
     </form>
+    <a href="<%=request.getContextPath()%>/JSP/chatRoom.jsp" class="link-button">Enter Chat Room</a>
     <a href="<%=request.getContextPath()%>/JSP/logout.jsp" class="link-button">Logout</a>
     <a href="<%=request.getContextPath()%>/JSP/delete.jsp" class="link-button">Delete Account</a>
 
