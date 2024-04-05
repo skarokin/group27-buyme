@@ -40,6 +40,37 @@
 <html>
 <head>
     <title>Register</title>
+        <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        input[type="text"], input[type="password"], input[type="email"] {
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 20%;
+        }
+        .action-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            color: #d9534f;
+            margin: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>BuyMe</h1>
@@ -51,8 +82,8 @@
         Username: <input type="text" name="username" required><br>
         Password: <input type="password" name="password" required><br>
         Email: <input type="email" name="email" required><br>
-        <button type="submit">Register</button>
+        <button type="submit" class="action-button">Register</button>
     </form>
-    <a href="<%=request.getContextPath()%>/JSP/login.jsp">Login</a>
+    <a href="<%=request.getContextPath()%>/JSP/login.jsp" class="action-button">Login</a>
 </body>
 </html>
