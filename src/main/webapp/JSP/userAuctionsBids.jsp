@@ -23,9 +23,9 @@
             }
         }
 
-        String userActivityQuery = "SELECT 'Bid' as activityType, b.bidAmount, i.title FROM bids b INNER JOIN items i ON b.itemID = i.itemID WHERE b.userID = ? " +
+        String userActivityQuery = "SELECT 'Bid' as activityType, b.bidAmount, i.title, b.bidID, b.itemID FROM bids b INNER JOIN items i ON b.itemID = i.itemID WHERE b.userID = ? " +
                                    "UNION ALL " +
-                                   "SELECT 'Auction' as activityType, i.initialPrice, i.title FROM items i WHERE i.userID = ?";
+                                   "SELECT 'Auction' as activityType, i.initialPrice, i.title, NULL as bidID, i.itemID FROM items i WHERE i.userID = ?";
         try (PreparedStatement ps = conn.prepareStatement(userActivityQuery)) {
             ps.setInt(1, userID);
             ps.setInt(2, userID);
@@ -35,6 +35,8 @@
                     activity.put("type", rs.getString("activityType"));
                     activity.put("amount", rs.getString("bidAmount"));
                     activity.put("title", rs.getString("title"));
+                    activity.put("itemID", rs.getString("itemID"));
+                    activity.put("bidID", rs.getString("bidID"));
                     userActivities.add(activity);
                 }
             }
@@ -75,13 +77,28 @@
             <th>Title</th>
             <th>Amount</th>
         </tr>
-        <% for (HashMap<String, String> activity : userActivities) { %>
-            <tr>
-                <td><%= activity.get("type") %></td>
-                <td><%= activity.get("title") %></td>
-                <td>$<%= activity.get("amount") %></td>
-            </tr>
-        <% } %>
+		<% for (HashMap<String, String> activity : userActivities) { %>
+		<tr>
+		  <td><%= activity.get("type") %></td>
+		  <td><%= activity.get("title") %></td>
+		  <td>$<%= activity.get("amount") %></td>
+			<% if (activity.get("type").equals("Auction")) { %>
+			  <td>
+			    <form action="deleteItem.jsp" method="post">
+			      <input type="hidden" name="itemID" value="<%= activity.get("itemID") %>">
+			      <button type="submit">Delete</button>
+			    </form>
+			  </td>
+			<% } else { %>
+			  <td>
+			    <form action="deleteBid.jsp" method="post">
+			      <input type="hidden" name="bidID" value="<%= activity.get("bidID") %>">
+			      <button type="submit">Withdraw Bid</button>
+			    </form>
+			  </td>
+			<% } %>
+		</tr>
+		<% } %>
     </table>
 
     <a href="<%=request.getContextPath()%>/JSP/dashboard.jsp" class="return-link">Back to Search</a>
