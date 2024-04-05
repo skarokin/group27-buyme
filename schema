@@ -1,0 +1,104 @@
+CREATE DATABASE IF NOT EXISTS `BarBeerDrinkerSample` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `BarBeerDrinkerSample`;
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+-- Table structure for table `users`
+DROP TABLE IF EXISTS `alerts`;
+DROP TABLE IF EXISTS `bids`;
+DROP TABLE IF EXISTS `items`;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `chat`;
+DROP TABLE IF EXISTS `messages`;
+
+CREATE TABLE `users` (
+  `userID` int AUTO_INCREMENT,
+  `email` varchar(50) NOT NULL UNIQUE,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  `balance` int DEFAULT 0,
+  PRIMARY KEY (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `items` (
+  `itemID` int AUTO_INCREMENT,
+  `userID` int NOT NULL,
+  `make` varchar(20),
+  `model` varchar(50),
+  `yom` int,
+  `color` varchar(20),
+  `description` varchar(200),
+  `closeTime` datetime,
+  `initialPrice` int,
+  `minSellPrice` int,
+  `minBidIncrement` int,
+  `category` text,
+  `title` varchar(255),
+  PRIMARY KEY (`itemID`),
+  FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `bids` (
+  `bidID` int AUTO_INCREMENT,
+  `itemID` int NOT NULL,
+  `userID` int NOT NULL,
+  `bidDate` date,
+  `bidAmount` float NOT NULL,
+  `autoBid` float,
+  PRIMARY KEY (`bidID`),
+  FOREIGN KEY (`itemID`) REFERENCES `items` (`itemID`),
+  FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `alerts` (
+  `alertID` int AUTO_INCREMENT,
+  `userID` int NOT NULL,
+  `make` varchar(20),
+  `model` varchar(50),
+  `yom` int,
+  `color` varchar(20),
+  PRIMARY KEY (`alertID`),
+  FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `chat` (
+  `chatID` int AUTO_INCREMENT PRIMARY KEY,
+  `chatter1UserID` int NOT NULL,
+  `chatter2UserID` int NOT NULL,
+  CONSTRAINT `fk_chatter1` FOREIGN KEY (`chatter1UserID`) REFERENCES `users` (`userID`),
+  CONSTRAINT `fk_chatter2` FOREIGN KEY (`chatter2UserID`) REFERENCES `users` (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `messages` (
+  `messageID` int AUTO_INCREMENT PRIMARY KEY,
+  `chatID` int NOT NULL,
+  `senderUserID` int NOT NULL,
+  `message` text NOT NULL,
+  `messageNumber` int NOT NULL,
+  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_chatID` FOREIGN KEY (`chatID`) REFERENCES `chat` (`chatID`),
+  CONSTRAINT `fk_senderUserID` FOREIGN KEY (`senderUserID`) REFERENCES `users` (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2018-07-10 13:49:53
