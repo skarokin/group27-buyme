@@ -8,18 +8,23 @@
 
     if ("POST".equalsIgnoreCase(request.getMethod()) && username != null && password != null) {
         try (Connection conn = new ApplicationDB().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT userID FROM users WHERE username = ? AND password = ?")) {
             stmt.setString(1, username);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
-            loginSuccess = rs.next();
+            if (rs.next()) {
+                int userId = rs.getInt("userID");
+                session.setAttribute("userID", userId); 
+                session.setAttribute("user", username);
+                response.sendRedirect(request.getContextPath() + "/JSP/dashboard.jsp");
+                return;
+            } else {
+                loginSuccess = false;
+            }
             rs.close();
         } catch (SQLException e) {
-        }
-        if (loginSuccess) {
-            session.setAttribute("user", username);
-            response.sendRedirect(request.getContextPath() + "/JSP/landingPage.jsp");
-            return;
+            e.printStackTrace();
+            loginSuccess = false;
         }
     }
 %>
