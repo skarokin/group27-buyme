@@ -69,18 +69,55 @@
 <head>
     <meta charset="UTF-8">
     <title>View Bid History</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        .history-entry {
+            margin: 10px auto;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .history-link {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .history-link:hover {
+            color: #0056b3;
+        }
+        .back-link {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <h1>Bid History for: <%= currentItemTitle %></h1>
     
     <% if (!initialBid.isEmpty()) { %>
-        <p>Initial Price by <a href="userAuctionsBids.jsp?userID=<%= initialBid.get("creatorUserID") %>"><%= initialBid.get("user") %></a>: $<%= initialBid.get("amount") %></p>
+        <div class="history-entry">
+            Initial Price by <a href="userAuctionsBids.jsp?userID=<%= initialBid.get("creatorUserID") %>" class="history-link"><%= initialBid.get("user") %></a>: $<%= initialBid.get("amount") %>
+        </div>
     <% } %>
     
     <% for (HashMap<String, String> bid : bidHistory) { %>
-        <p><a href="userAuctionsBids.jsp?userID=<%= bid.get("userID") %>"><%= bid.get("user") %></a> bid $<%= bid.get("amount") %> on <%= bid.get("date") %></p>
+        <div class="history-entry">
+            <a href="userAuctionsBids.jsp?userID=<%= bid.get("userID") %>" class="history-link"><%= bid.get("user") %></a> bid $<%= bid.get("amount") %> on <%= bid.get("date") %>
+        </div>
     <% } %>
 
-    <a href="searchItems.jsp">Back to Search</a>
+    <a href="searchItems.jsp" class="back-link">Back to Search</a>
 </body>
 </html>

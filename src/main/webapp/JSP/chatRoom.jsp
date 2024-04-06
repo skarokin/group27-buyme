@@ -90,12 +90,71 @@
     <title>Chat Room</title>
     <meta http-equiv="refresh" content="5">
     <style>
-        .message-box { border: 1px solid #ddd; margin: 20px; padding: 10px; height: 300px; overflow-y: auto; }
-        .message { margin-bottom: 10px; padding: 5px; border-bottom: 1px solid #f0f0f0; }
-        .message span.username { font-weight: bold; }
-        .message span.timestamp { font-size: 0.8em; color: #666; }
-        form { margin-top: 20px; }
-        .exit-chat { margin-top: 20px; }
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        .message-box {
+            border: 1px solid #ddd;
+            margin: 20px auto;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            width: 80%;
+            max-width: 600px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .message span.username {
+            font-weight: bold;
+        }
+        .message span.timestamp {
+            font-size: 0.8em;
+            color: #666;
+        }
+        form {
+            margin-top: 20px;
+            display: inline-block;
+            width: 80%;
+            max-width: 600px;
+        }
+        input[type="text"],
+        input[type="submit"] {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: calc(50% - 22px);
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .exit-chat {
+            margin-top: 20px;
+        }
+        .exit-chat button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .exit-chat button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -142,3 +201,4 @@
     </div>
 </body>
 </html>
+

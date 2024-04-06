@@ -69,46 +69,105 @@
 <head>
     <title>Search Items</title>
     <style>
-        .bid-history { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #000; padding: 20px; z-index: 2; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1; }
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        .form-input,
+        .form-button,
+        .link-button {
+            margin: 10px;
+            padding: 10px;
+        }
+        .form-input {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .form-button:hover {
+            background-color: #0056b3;
+        }
+        .link-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .link-button:hover {
+            background-color: #0056b3;
+        }
+        .bid-history,
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #000;
+            padding: 20px;
+            z-index: 2;
+        }
+        .overlay {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 40px;
+        }
     </style>
 </head>
 <body>
     <h1>Search for Items</h1>
     <form action="searchItems.jsp" method="post">
-        Search Query: <input type="text" name="searchQuery" required><br>
-        <button type="submit">Search</button>
+        Search Query: <input type="text" name="searchQuery" class="form-input" required><br>
+        <button type="submit" class="form-button">Search</button>
     </form>
 
     <h2>Search Results:</h2>
     <% if (!searchResults.isEmpty()) { %>
 <ul>
     <% for (Map<String, Object> item : searchResults) { %>
-        <li style="margin-bottom: 40px;">
+        <li>
             <%= item.get("title") %><br>
             Initial Price: $<%= item.get("initialPrice") %><br>
             Highest Bid: $<%= item.get("highestBid") %><br>
             <% if (!item.get("ownerID").equals(loggedInUserId)) { %>
-                <!-- Form updated to include optional automatic bidding -->
                 <form action="searchIt.jsp" method="post">
                     <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
-                    Bid Amount: <input type="number" name="bidAmount" step="0.01" required><br>
-                    Auto-Bid Limit: <input type="number" name="autoBidLimit" step="0.01" placeholder="Optional: Your max limit"><br>
-                    <input type="submit" value="Place Bid / Set Auto-Bid">
+                    Bid Amount: <input type="number" name="bidAmount" class="form-input" step="0.01" required><br>
+                    Auto-Bid Limit: <input type="number" name="autoBidLimit" class="form-input" step="0.01" placeholder="Optional: Your max limit"><br>
+                    <input type="submit" class="form-button" value="Place Bid / Set Auto-Bid">
                 </form>
             <% } else { %>
                 <form action="deleteItem.jsp" method="post">
                     <input type="hidden" name="itemID" value="<%= item.get("itemID") %>">
-                    <input type="submit" value="Delete Listing" onclick="return confirm('Are you sure you want to delete this listing?');">
+                    <input type="submit" class="form-button" value="Delete Listing" onclick="return confirm('Are you sure you want to delete this listing?');">
                 </form>
             <% } %>
-            <a href="viewBidHistory.jsp?itemID=<%=item.get("itemID")%>" class="button-link">View Bids</a>
+            <a href="viewBidHistory.jsp?itemID=<%=item.get("itemID")%>" class="link-button">View Bids</a>
         </li>
     <% } %>
 </ul>
 <% } else { %>
     <p>No results found.</p>
 <% } %>
-<a href="dashboard.jsp">Back to Dashboard</a>
+<a href="<%=request.getContextPath()%>/JSP/dashboard.jsp" class="link-button">Back to Dashboard</a>
 </body>
 </html>
+
