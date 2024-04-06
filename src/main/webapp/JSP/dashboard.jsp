@@ -70,6 +70,18 @@
     <a href="<%=request.getContextPath()%>/JSP/logout.jsp" class="link-button">Logout</a>
     <a href="<%=request.getContextPath()%>/JSP/delete.jsp" class="link-button">Delete Account</a>
 
+	<% if ("custRep".equals(session.getAttribute("userRole")) || "admin".equals(session.getAttribute("userRole"))) { %>
+	    <a href="<%=request.getContextPath()%>/JSP/modifyUserInfo.jsp" class="link-button">Modify User Information</a>
+	<% } %>
+	
+	<% if ("admin".equals(session.getAttribute("userRole"))) { %>
+	    <a href="<%=request.getContextPath()%>/JSP/createCustRepAccount.jsp" class="link-button">Create Customer Rep Account</a>
+	    <a href="<%=request.getContextPath()%>/JSP/generateReports.jsp" class="link-button">Generate Sales Reports</a>
+	<% } %>
+
+
+</body>
+</html>
     <h2>Your Alerts</h2>
     <table>
         <tr>
