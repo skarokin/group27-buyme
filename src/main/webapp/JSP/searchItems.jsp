@@ -2,12 +2,29 @@
 <%@ page import="com.cs336.pkg.ApplicationDB" %>
 <%
     Integer loggedInUserId = (Integer) session.getAttribute("userID");
-    String searchQuery = request.getParameter("searchQuery");
-    List<Map<String, Object>> searchResults = new ArrayList<>();
-    Map<Integer, Float> highestBids = new HashMap<>();
-    Map<Integer, Float> initialPrices = new HashMap<>();
+    String newSearchQuery = request.getParameter("searchQuery");
+    String storedSearchQuery = (String) session.getAttribute("lastSearchQuery");
+    
+    // Decide whether to use new search query or retrieve cached results
+    String searchQuery = newSearchQuery != null && !newSearchQuery.isEmpty() ? newSearchQuery : storedSearchQuery;
+    
+    // Initialize the data structures to hold search results and bid information
+    List<Map<String, Object>> searchResults;
+    Map<Integer, Float> highestBids;
+    Map<Integer, Float> initialPrices;
 
-    if (searchQuery != null && !searchQuery.isEmpty()) {
+    if (newSearchQuery != null && !newSearchQuery.isEmpty()) {
+        // Clear previous session attributes if a new search is conducted
+        session.removeAttribute("lastSearchQuery");
+        session.removeAttribute("searchResults");
+        session.removeAttribute("highestBids");
+        session.removeAttribute("initialPrices");
+        
+        // Perform a new search and cache results
+        searchResults = new ArrayList<>();
+        highestBids = new HashMap<>();
+        initialPrices = new HashMap<>();
+        
         try (Connection conn = new ApplicationDB().getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(
                 "SELECT i.*, (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) AS highestBid " +
@@ -27,9 +44,24 @@
                 initialPrices.put(rs.getInt("itemID"), rs.getFloat("initialPrice"));
                 highestBids.put(rs.getInt("itemID"), rs.getFloat("highestBid") == 0 ? rs.getFloat("initialPrice") : rs.getFloat("highestBid"));
             }
+            // Cache the search query and results in the session
+            session.setAttribute("lastSearchQuery", searchQuery);
+            session.setAttribute("searchResults", searchResults);
+            session.setAttribute("highestBids", highestBids);
+            session.setAttribute("initialPrices", initialPrices);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    } else if (storedSearchQuery != null) {
+        // Retrieve cached results if no new search query is provided
+        searchResults = (List<Map<String, Object>>) session.getAttribute("searchResults");
+        highestBids = (Map<Integer, Float>) session.getAttribute("highestBids");
+        initialPrices = (Map<Integer, Float>) session.getAttribute("initialPrices");
+    } else {
+        // Initialize empty structures if there's no search query
+        searchResults = new ArrayList<>();
+        highestBids = new HashMap<>();
+        initialPrices = new HashMap<>();
     }
 
     String itemIDToBidStr = request.getParameter("itemIDToBid");
