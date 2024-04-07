@@ -49,9 +49,9 @@
             }
         }
 
-        String userActivityQuery = "SELECT 'Bid' as activityType, b.bidAmount, i.title, b.bidID, i.itemID, i.closeTime, i.closeTime <= NOW() as auctionEnded, (SELECT MAX(bidAmount) FROM bids WHERE itemID = b.itemID) as highestBid, b.userID = (SELECT userID FROM bids WHERE itemID = b.itemID ORDER BY bidAmount DESC LIMIT 1) as isWinner FROM bids b INNER JOIN items i ON b.itemID = i.itemID WHERE b.userID = ? " +
-                                   "UNION ALL " +
-                                   "SELECT 'Auction' as activityType, i.initialPrice, i.title, NULL as bidID, i.itemID, i.closeTime, i.closeTime <= NOW() as auctionEnded, (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) as highestBid, FALSE as isWinner FROM items i WHERE i.userID = ?";
+        String userActivityQuery = "SELECT 'Bid' as activityType, b.bidAmount, b.autoBid, i.title, b.bidID, i.itemID, i.closeTime, i.closeTime <= NOW() as auctionEnded, (SELECT MAX(bidAmount) FROM bids WHERE itemID = b.itemID) as highestBid, b.userID = (SELECT userID FROM bids WHERE itemID = b.itemID ORDER BY bidAmount DESC LIMIT 1) as isWinner FROM bids b INNER JOIN items i ON b.itemID = i.itemID WHERE b.userID = ? " +
+                "UNION ALL " +
+                "SELECT 'Auction' as activityType, i.initialPrice, NULL as autoBid, i.title, NULL as bidID, i.itemID, i.closeTime, i.closeTime <= NOW() as auctionEnded, (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) as highestBid, FALSE as isWinner FROM items i WHERE i.userID = ?";
         try (PreparedStatement ps = conn.prepareStatement(userActivityQuery)) {
             ps.setInt(1, userID);
             ps.setInt(2, userID);
@@ -60,6 +60,7 @@
                     HashMap<String, String> activity = new HashMap<>();
                     activity.put("type", rs.getString("activityType"));
                     activity.put("amount", rs.getString("bidAmount") == null ? "N/A" : rs.getString("bidAmount"));
+                    activity.put("autoBid", rs.getString("autoBid") == null ? "No" : "Yes");
                     activity.put("title", rs.getString("title"));
                     activity.put("itemID", rs.getString("itemID"));
                     activity.put("bidID", rs.getString("bidID") == null ? "N/A" : rs.getString("bidID"));
@@ -104,48 +105,50 @@
 </head>
 <body>
     <h1><%= username %>'s Bids/Auctions</h1>
-    <table>
-        <tr>
-            <th>Type</th>
-            <th>Title</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Auction End Time</th> <!-- New column header -->
-            <th>Action</th>
-        </tr>
-        <% for (HashMap<String, String> activity : userActivities) {
-            String status = "Active";
-            if ("true".equals(activity.get("auctionEnded"))) {
-                status = "Auction Ended";
-                if ("Bid".equals(activity.get("type")) && "true".equals(activity.get("isWinner"))) {
-                    status += " - Won";
-                } else if ("Bid".equals(activity.get("type"))) {
-                    status += " - Lost";
-                }
+<table>
+    <tr>
+        <th>Type</th>
+        <th>Title</th>
+        <th>Amount</th>
+        <th>Bid Type</th> <!-- New column for Bid Type -->
+        <th>Status</th>
+        <th>Auction End Time</th>
+        <th>Action</th>
+    </tr>
+    <% for (HashMap<String, String> activity : userActivities) {
+        String status = "Active";
+        if ("true".equals(activity.get("auctionEnded"))) {
+            status = "Auction Ended";
+            if ("Bid".equals(activity.get("type")) && "true".equals(activity.get("isWinner"))) {
+                status += " - Won";
+            } else if ("Bid".equals(activity.get("type"))) {
+                status += " - Lost";
             }
-        %>
-        <tr>
-            <td><%= activity.get("type") %></td>
-            <td><%= activity.get("title") %></td>
-            <td>$<%= activity.get("amount") %></td>
-            <td><%= status %></td>
-            <td><%= activity.get("closeTime") %></td>
-            <td>
-                <% if ("Bid".equals(activity.get("type"))) { %>
-                    <form action="deleteBid.jsp" method="post">
-                        <input type="hidden" name="bidID" value="<%= activity.get("bidID") %>">
-                        <button type="submit">Withdraw Bid</button>1
-                    </form>
-                <% } else { %>
-                    <form action="deleteItem.jsp" method="post">
-                        <input type="hidden" name="itemID" value="<%= activity.get("itemID") %>">
-                        <button type="submit">Delete Auction</button>
-                    </form>
-                <% } %>
-            </td>
-        </tr>
-        <% } %>
-    </table>
+        }
+    %>
+    <tr>
+        <td><%= activity.get("type") %></td>
+        <td><%= activity.get("title") %></td>
+        <td>$<%= activity.get("amount") %></td>
+        <td><%= "Yes".equals(activity.get("autoBid")) ? "Auto-bid" : "Manual Bid" %></td> <!-- Displaying Bid Type -->
+        <td><%= status %></td>
+        <td><%= activity.get("closeTime") %></td>
+        <td>
+            <% if ("Bid".equals(activity.get("type"))) { %>
+                <form action="deleteBid.jsp" method="post">
+                    <input type="hidden" name="bidID" value="<%= activity.get("bidID") %>">
+                    <button type="submit">Withdraw Bid</button>
+                </form>
+            <% } else { %>
+                <form action="deleteItem.jsp" method="post">
+                    <input type="hidden" name="itemID" value="<%= activity.get("itemID") %>">
+                    <button type="submit">Delete Auction</button>
+                </form>
+            <% } %>
+        </td>
+    </tr>
+    <% } %>
+</table>
 
     <a href="<%=request.getContextPath()%>/JSP/dashboard.jsp" class="return-link">Back to Dashboard</a>
 </body>
