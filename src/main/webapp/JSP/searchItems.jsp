@@ -148,12 +148,12 @@
                 Initial Price: $<%= item.get("initialPrice") %><br>
                 Highest Bid: $<%= item.get("highestBid") %><br>
                 <% if (!item.get("ownerID").equals(loggedInUserId)) { %>
-                    <form action="searchIt.jsp" method="post">
+                    <form action="searchItems.jsp" method="post">
                         <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
                         Bid Amount: <input type="number" name="bidAmount" class="form-input" step="0.01" required><br>
                         <input type="submit" class="form-button" value="Place Bid">
                     </form>
-                    <form action="searchIt.jsp" method="post">
+                    <form action="searchItems.jsp" method="post">
                         <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
                         Auto-Bid Limit: <input type="number" name="autoBidLimit" class="form-input" step="0.01" placeholder="Optional: Your max limit"><br>
                         <input type="submit" class="form-button" value="Set Auto-Bid">
