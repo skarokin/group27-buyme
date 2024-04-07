@@ -62,26 +62,25 @@
     <a href="<%=request.getContextPath()%>/JSP/listItemForm.jsp" class="link-button">List an Item</a>
     <a href="<%=request.getContextPath()%>/JSP/searchItems.jsp" class="link-button">Search Items</a>
     <a href="<%=request.getContextPath()%>/JSP/setAlertsForm.jsp" class="link-button">Set Alerts</a>
+    
     <form action="<%=request.getContextPath()%>/JSP/userAuctionsBids.jsp" method="post">
         <input type="hidden" name="userID" value="<%= userId %>">
         <button type="submit" class="action-button">View My Bids/Auctions</button>
     </form>
+    
     <a href="<%=request.getContextPath()%>/JSP/chatRoom.jsp" class="link-button">Enter Chat Room</a>
     <a href="<%=request.getContextPath()%>/JSP/logout.jsp" class="link-button">Logout</a>
     <a href="<%=request.getContextPath()%>/JSP/delete.jsp" class="link-button">Delete Account</a>
 
-	<% if ("custRep".equals(session.getAttribute("userRole")) || "admin".equals(session.getAttribute("userRole"))) { %>
-	    <a href="<%=request.getContextPath()%>/JSP/modifyUserInfo.jsp" class="link-button">Modify User Information</a>
-	<% } %>
-	
-	<% if ("admin".equals(session.getAttribute("userRole"))) { %>
-	    <a href="<%=request.getContextPath()%>/JSP/createCustRepAccount.jsp" class="link-button">Create Customer Rep Account</a>
-	    <a href="<%=request.getContextPath()%>/JSP/generateReports.jsp" class="link-button">Generate Sales Reports</a>
-	<% } %>
+    <% if ("custRep".equals(session.getAttribute("userRole")) || "admin".equals(session.getAttribute("userRole"))) { %>
+        <a href="<%=request.getContextPath()%>/JSP/modifyUserInfo.jsp" class="link-button">Modify User Information</a>
+    <% } %>
+    
+    <% if ("admin".equals(session.getAttribute("userRole"))) { %>
+        <a href="<%=request.getContextPath()%>/JSP/createCustRepAccount.jsp" class="link-button">Create Customer Rep Account</a>
+        <a href="<%=request.getContextPath()%>/JSP/generateReports.jsp" class="link-button">Generate Sales Reports</a>
+    <% } %>
 
-
-</body>
-</html>
     <h2>Your Alerts</h2>
     <table>
         <tr>
@@ -115,25 +114,25 @@
                         psAuctions.setInt(3, yom);
                         psAuctions.setString(4, color);
                         ResultSet rsAuctions = psAuctions.executeQuery();
+                        
                         if (rsAuctions.next()) {
                             isMatchFound = rsAuctions.getInt("matchCount") > 0;
                         }
-
-                        %>
-                        <tr>
-                            <td><%= make %></td>
-                            <td><%= model %></td>
-                            <td><%= yom %></td>
-                            <td><%= color %></td>
-                            <td><%= isMatchFound ? "<span style='color: green;'>Match Found!</span>" : "Pending" %></td>
-                            <td>
-                                <form action="<%=request.getContextPath()%>/JSP/deleteAlert.jsp" method="post">
-                                    <input type="hidden" name="alertID" value="<%= alertID %>">
-                                    <input type="submit" value="Delete">
-                                </form>
-                            </td>
-                        </tr>
-                        <%
+        %>
+        <tr>
+            <td><%= make %></td>
+            <td><%= model %></td>
+            <td><%= yom %></td>
+            <td><%= color %></td>
+            <td><%= isMatchFound ? "<span style='color: green;'>Match Found!</span>" : "Pending" %></td>
+            <td>
+                <form action="<%=request.getContextPath()%>/JSP/deleteAlert.jsp" method="post">
+                    <input type="hidden" name="alertID" value="<%= alertID %>">
+                    <input type="submit" value="Delete">
+                </form>
+            </td>
+        </tr>
+        <%
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -143,5 +142,3 @@
             }
         %>
     </table>
-    </body>
-</html>

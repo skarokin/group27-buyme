@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS `items`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `chat`;
 DROP TABLE IF EXISTS `messages`;
+DROP TABLE IF EXISTS `payments`;
 
 CREATE TABLE `users` (
   `userID` int AUTO_INCREMENT,
@@ -26,8 +27,12 @@ CREATE TABLE `users` (
   `username` varchar(100) NOT NULL,
   `password` varchar(50) NOT NULL,
   `balance` int DEFAULT 0,
+  `totalSpent` float DEFAULT 0,
+  `totalEarned` float DEFAULT 0,
+  `role` varchar(25) DEFAULT 'user',
   PRIMARY KEY (`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 
 CREATE TABLE `items` (
   `itemID` int AUTO_INCREMENT,
@@ -43,6 +48,7 @@ CREATE TABLE `items` (
   `minBidIncrement` int,
   `category` text,
   `title` varchar(255),
+  `balanceUpdated` boolean,
   PRIMARY KEY (`itemID`),
   FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -88,6 +94,20 @@ CREATE TABLE IF NOT EXISTS `messages` (
   CONSTRAINT `fk_senderUserID` FOREIGN KEY (`senderUserID`) REFERENCES `users` (`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE IF NOT EXISTS `payments` (
+  `paymentID` int AUTO_INCREMENT,
+  `transactionID` int NOT NULL,
+  `itemID` int NOT NULL,
+  `buyerID` int NOT NULL,
+  `sellerID` int NOT NULL,
+  `paymentAmount` float NOT NULL,
+  `paymentDate` datetime NOT NULL,
+  PRIMARY KEY (`paymentID`),
+  FOREIGN KEY (`transactionID`) REFERENCES `transactions`(`transactionID`),
+  FOREIGN KEY (`itemID`) REFERENCES `items`(`itemID`),
+  FOREIGN KEY (`buyerID`) REFERENCES `users`(`userID`),
+  FOREIGN KEY (`sellerID`) REFERENCES `users`(`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 

@@ -8,14 +8,16 @@
 
     if ("POST".equalsIgnoreCase(request.getMethod()) && username != null && password != null) {
         try (Connection conn = new ApplicationDB().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT userID FROM users WHERE username = ? AND password = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT userID, role FROM users WHERE username = ? AND password = ?")) {
             stmt.setString(1, username);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 int userId = rs.getInt("userID");
+                String userRole = rs.getString("role");
                 session.setAttribute("userID", userId); 
                 session.setAttribute("user", username);
+                session.setAttribute("userRole", userRole); 
                 response.sendRedirect(request.getContextPath() + "/JSP/dashboard.jsp");
                 return;
             } else {
