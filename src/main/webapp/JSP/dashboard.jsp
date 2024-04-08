@@ -57,7 +57,12 @@
     <%
         Integer userId = (Integer) session.getAttribute("userID");
     %>
-    <h1>BuyMe Dashboard</h1>
+    
+<body>
+  <div style="margin-bottom: 30px;">
+    <img src="../logo.png" alt="Logo" />
+  </div>
+</body>
 
     <a href="<%=request.getContextPath()%>/JSP/listItemForm.jsp" class="link-button">List an Item</a>
     <a href="<%=request.getContextPath()%>/JSP/searchItems.jsp" class="link-button">Search Items</a>
@@ -142,3 +147,4 @@
             }
         %>
     </table>
+   
