@@ -81,16 +81,16 @@
             border-bottom: 1px solid #ddd;
         }
         .history-link {
-            color: #007bff;
+            color: #49b8dc;
             text-decoration: none;
             transition: color 0.3s;
         }
         .history-link:hover {
-            color: #0056b3;
+            color: #2b6e84;
         }
         .back-link {
             display: inline-block;
-            background-color: #007bff;
+            background-color: #49b8dc;
             color: white;
             padding: 10px 20px;
             margin-top: 20px;
@@ -99,7 +99,7 @@
             transition: background-color 0.3s;
         }
         .back-link:hover {
-            background-color: #0056b3;
+            background-color: #2b6e84;
         }
     </style>
 </head>

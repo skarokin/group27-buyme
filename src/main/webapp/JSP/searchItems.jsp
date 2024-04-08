@@ -117,7 +117,7 @@
             border-radius: 5px;
         }
         .form-button {
-            background-color: #007bff;
+            background-color: #49b8dc;
             color: white;
             border: none;
             border-radius: 5px;
@@ -125,18 +125,18 @@
             transition: background-color 0.3s;
         }
         .form-button:hover {
-            background-color: #0056b3;
+            background-color: #2b6e84;
         }
         .link-button {
             display: inline-block;
-            background-color: #007bff;
+            background-color: #49b8dc;
             color: white;
             text-decoration: none;
             border-radius: 5px;
             transition: background-color 0.3s;
         }
         .link-button:hover {
-            background-color: #0056b3;
+            background-color: #2b6e84;
         }
         .bid-history,
         .overlay {

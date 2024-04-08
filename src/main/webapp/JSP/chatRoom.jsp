@@ -131,21 +131,21 @@
             width: calc(50% - 22px);
         }
         input[type="submit"] {
-            background-color: #007bff;
+            background-color: #49b8dc;
             color: white;
             border: none;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         input[type="submit"]:hover {
-            background-color: #0056b3;
+            background-color: #2b6e84;
         }
         .exit-chat {
             margin-top: 20px;
         }
         .exit-chat button {
             padding: 10px 20px;
-            background-color: #007bff;
+            background-color: #49b8dc;
             color: white;
             border: none;
             border-radius: 5px;
@@ -153,7 +153,7 @@
             transition: background-color 0.3s;
         }
         .exit-chat button:hover {
-            background-color: #0056b3;
+            background-color: #2b6e84;
         }
     </style>
 </head>

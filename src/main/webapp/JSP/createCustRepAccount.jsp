@@ -21,7 +21,7 @@
         }
         .action-button {
             display: inline-block;
-            background-color: #007bff;
+            background-color: #49b8dc;
             color: white;
             padding: 10px 20px;
             margin: 10px;
@@ -30,7 +30,7 @@
             transition: background-color 0.3s;
         }
         .action-button:hover {
-            background-color: #0056b3;
+            background-color: #2b6e84;
         }
     </style>
 </head>
