@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   FOREIGN KEY (`sellerID`) REFERENCES `users`(`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+INSERT INTO users (role, email, username, password) VALUES ('admin', 'admin@email.com', 'admin', 'adminpass');
 
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
