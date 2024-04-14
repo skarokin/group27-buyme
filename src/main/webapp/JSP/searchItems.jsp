@@ -40,6 +40,9 @@
                 row.put("ownerID", rs.getInt("userID"));
                 row.put("initialPrice", rs.getFloat("initialPrice"));
                 row.put("highestBid", rs.getFloat("highestBid") == 0 ? rs.getFloat("initialPrice") : rs.getFloat("highestBid"));
+                row.put("closeTime", rs.getString("closeTime"));
+                row.put("minSellPrice", rs.getInt("minSellPrice"));
+                row.put("minBidIncrement", rs.getInt("minBidIncrement"));
                 searchResults.add(row);
                 initialPrices.put(rs.getInt("itemID"), rs.getFloat("initialPrice"));
                 highestBids.put(rs.getInt("itemID"), rs.getFloat("highestBid") == 0 ? rs.getFloat("initialPrice") : rs.getFloat("highestBid"));
@@ -66,9 +69,16 @@
 
     String itemIDToBidStr = request.getParameter("itemIDToBid");
     String bidAmountStr = request.getParameter("bidAmount");
+    String autoBidLimitStr = request.getParameter("autoBidLimit");
+
     if (itemIDToBidStr != null && bidAmountStr != null && !itemIDToBidStr.isEmpty() && !bidAmountStr.isEmpty() && loggedInUserId != null) {
         int itemIDToBid = Integer.parseInt(itemIDToBidStr);
         float bidAmount = Float.parseFloat(bidAmountStr);
+        float autoBidLimit = 0; // Default value for autoBidLimit
+
+        if (autoBidLimitStr != null && !autoBidLimitStr.isEmpty()) {
+            autoBidLimit = Float.parseFloat(autoBidLimitStr);
+        }
 
         try (Connection conn = new ApplicationDB().getConnection()) {
             String checkBidQuery = "SELECT MAX(bidAmount) AS maxBid FROM bids WHERE itemID = ?";
@@ -81,16 +91,17 @@
                 maxBid = rs.getFloat("maxBid");
             }
 
-            if (bidAmount > maxBid) {
+            if ((autoBidLimit == 0 || autoBidLimit > maxBid) && bidAmount > maxBid) {
                 PreparedStatement insertBidStmt = conn.prepareStatement(
-                    "INSERT INTO Bids (itemId, userId, bidAmount) VALUES (?, ?, ?)");
+                    "INSERT INTO Bids (itemId, userId, bidAmount, autoBid) VALUES (?, ?, ?, ?)");
                 insertBidStmt.setInt(1, itemIDToBid);
                 insertBidStmt.setInt(2, loggedInUserId);
                 insertBidStmt.setFloat(3, bidAmount);
+                insertBidStmt.setFloat(4, autoBidLimit);
                 insertBidStmt.executeUpdate();
                 response.sendRedirect("bidSuccess.jsp?itemIDToBid=" + itemIDToBid);
-            } else {
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -179,17 +190,16 @@
                 <%= item.get("title") %><br>
                 Initial Price: $<%= item.get("initialPrice") %><br>
                 Highest Bid: $<%= item.get("highestBid") %><br>
+                Closing Time: <%= item.get("closeTime") %><br>
+                Minimum Sell Price: $<%= item.get("minSellPrice") %><br>
+                Minimum Bid Increment: $<%= item.get("minBidIncrement") %><br>
                 <% if (!item.get("ownerID").equals(loggedInUserId)) { %>
-                    <form action="searchItems.jsp" method="post">
-                        <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
-                        Bid Amount: <input type="number" name="bidAmount" class="form-input" step="0.01" required><br>
-                        <input type="submit" class="form-button" value="Place Bid">
-                    </form>
-                    <form action="searchItems.jsp" method="post">
-                        <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
-                        Auto-Bid Limit: <input type="number" name="autoBidLimit" class="form-input" step="0.01" placeholder="Optional: Your max limit"><br>
-                        <input type="submit" class="form-button" value="Set Auto-Bid">
-                    </form>
+					<form action="searchItems.jsp" method="post">
+					    <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
+					    Bid Amount: <input type="number" name="bidAmount" class="form-input" step="0.01" required><br>
+					    Auto-Bid Limit: <input type="number" name="autoBidLimit" class="form-input" step="0.01" placeholder="Optional: Your max limit"><br>
+					    <input type="submit" class="form-button" value="Place Bid">
+					</form>
                 <% } else { %>
                     <form action="deleteItem.jsp" method="post">
                         <input type="hidden" name="itemID" value="<%= item.get("itemID") %>">

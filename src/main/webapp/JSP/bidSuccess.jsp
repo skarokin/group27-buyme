@@ -31,6 +31,7 @@
         a:hover {
             background-color: #286090;
         }
+        
     </style>
 </head>
 <body>
@@ -43,6 +44,11 @@
 <a href="dashboard.jsp">Return to Dashboard</a>
 <a href="searchItems.jsp">Continue Browsing</a>
 <a href="viewBidHistory.jsp?itemID=<%= request.getParameter("itemIDToBid") %>">View Bid History</a>
+
+<!-- Include updateBid.jsp -->
+<jsp:include page="updateBid.jsp">
+    <jsp:param name="itemID" value="${param.itemIDToBid}" />
+</jsp:include>
 
 </body>
 </html>

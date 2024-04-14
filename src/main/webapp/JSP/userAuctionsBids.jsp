@@ -60,7 +60,7 @@
                     HashMap<String, String> activity = new HashMap<>();
                     activity.put("type", rs.getString("activityType"));
                     activity.put("amount", rs.getString("bidAmount") == null ? "N/A" : rs.getString("bidAmount"));
-                    activity.put("autoBid", rs.getString("autoBid") == null ? "No" : "Yes");
+                    activity.put("autoBid", rs.getString("autoBid"));
                     activity.put("title", rs.getString("title"));
                     activity.put("itemID", rs.getString("itemID"));
                     activity.put("bidID", rs.getString("bidID") == null ? "N/A" : rs.getString("bidID"));
@@ -129,8 +129,8 @@
     <tr>
         <td><%= activity.get("type") %></td>
         <td><%= activity.get("title") %></td>
-        <td>$<%= activity.get("amount") %></td>
-        <td><%= "Yes".equals(activity.get("autoBid")) ? "Auto-bid" : "Manual Bid" %></td> <!-- Displaying Bid Type -->
+        <td><%= activity.get("amount") %></td>
+        <td><%= Float.parseFloat(activity.get("autoBid")) == 0 ? "Manual Bid" : "Auto-bid, max: " + activity.get("autoBid") %></td>
         <td><%= status %></td>
         <td><%= activity.get("closeTime") %></td>
         <td>
