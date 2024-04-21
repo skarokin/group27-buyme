@@ -47,15 +47,22 @@
 <body>
 <%
     Integer userId = (Integer) session.getAttribute("userID");
+    String userRole = (String) session.getAttribute("userRole");
     String itemId = request.getParameter("itemID");
     if (userId == null || itemId == null) {
         response.sendRedirect("login.jsp");
     } else {
         boolean deletionSuccess = false;
-        try (Connection conn = new ApplicationDB().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM Items WHERE itemID = ? AND userId = ?")) {
+        try (Connection conn = new ApplicationDB().getConnection()) {
+            String sql = "DELETE FROM Items WHERE itemID = ?";
+            if (!"custRep".equals(userRole) && !"admin".equals(userRole)) {
+                sql += " AND userId = ?";
+            }
+            PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, itemId);
-            stmt.setInt(2, userId);
+            if (!"custRep".equals(userRole) && !"admin".equals(userRole)) {
+                stmt.setInt(2, userId);
+            }
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 deletionSuccess = true;

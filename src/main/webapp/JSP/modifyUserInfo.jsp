@@ -12,7 +12,7 @@
             font-family: Arial, sans-serif;
             margin-top: 50px;
         }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="email"] {
             padding: 10px;
             margin: 10px;
             border: 1px solid #ddd;
@@ -51,23 +51,34 @@
         <button type="submit" class="action-button">Search</button>
     </form>
     <%
-
     String searchQuery = request.getParameter("search");
     if (searchQuery != null && !searchQuery.isEmpty()) {
         try (Connection conn = new ApplicationDB().getConnection()) {
-            String query = "SELECT userID, username FROM users WHERE username LIKE ? AND role = 'user'";
+            String query = "SELECT userID, username, email FROM users WHERE username LIKE ? AND role = 'user'";
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setString(1, "%" + searchQuery + "%");
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
+                        int userId = rs.getInt("userID");
+                        String username = rs.getString("username");
+                        String email = rs.getString("email");
                         %>
                         <div class="user-entry">
-                            <a href="<%=request.getContextPath()%>/JSP/userAuctionsBids.jsp?userID=<%= rs.getInt("userID") %>" class="user-link"><%= rs.getString("username") %></a>
-                            <form action="<%=request.getContextPath()%>/JSP/resetPassword.jsp" method="post" style="display: inline;">
-                                <input type="hidden" name="userID" value="<%= rs.getInt("userID") %>">
+                            <a href="<%=request.getContextPath()%>/JSP/userAuctionsBids.jsp?userID=<%= userId %>" class="user-link"><%= username %></a> (<%= email %>)
+                            <form action="" method="post" style="display: inline;">
+                                <input type="hidden" name="userID" value="<%= userId %>">
+                                <input type="hidden" name="action" value="reset">
                                 New Password: <input type="password" name="newPassword" required>
                                 <button type="submit" class="reset-button">Reset Password</button>
                             </form>
+                            <% if ("custRep".equals(session.getAttribute("userRole")) || "admin".equals(session.getAttribute("userRole"))) { %>
+                                <form action="" method="post" style="display: inline;">
+                                    <input type="hidden" name="userID" value="<%= userId %>">
+                                    <input type="hidden" name="action" value="updateEmail">
+                                    New Email: <input type="email" name="newEmail" required>
+                                    <button type="submit" class="action-button">Update Email</button>
+                                </form>
+                            <% } %>
                         </div>
                         <%
                     }
