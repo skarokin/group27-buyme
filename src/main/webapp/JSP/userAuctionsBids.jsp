@@ -78,89 +78,116 @@
         e.printStackTrace();
     }
     
-%>
+    Map<Integer, String> bidAlerts = new HashMap<>();
+    try (Connection conn = new ApplicationDB().getConnection()) {
+        // Query to find the highest bid for each item the user has bid on
+        String userHighestBidsQuery = "SELECT b.itemID, MAX(b.bidAmount) AS userHighestBid "
+            + "FROM bids b WHERE b.userID = ? GROUP BY b.itemID";
+        PreparedStatement userHighestBidsStmt = conn.prepareStatement(userHighestBidsQuery);
+        userHighestBidsStmt.setInt(1, userID);
+        ResultSet userHighestBidsRs = userHighestBidsStmt.executeQuery();
+
+        Map<Integer, Float> userHighestBids = new HashMap<>();
+        while (userHighestBidsRs.next()) {
+            userHighestBids.put(userHighestBidsRs.getInt("itemID"), userHighestBidsRs.getFloat("userHighestBid"));
+        }
+
+        // Query to find the current highest bids
+        String currentHighestBidsQuery = "SELECT b.itemID, MAX(b.bidAmount) AS currentHighestBid "
+            + "FROM bids b GROUP BY b.itemID";
+        PreparedStatement currentHighestBidsStmt = conn.prepareStatement(currentHighestBidsQuery);
+        ResultSet currentHighestBidsRs = currentHighestBidsStmt.executeQuery();
+
+        while (currentHighestBidsRs.next()) {
+            int itemID = currentHighestBidsRs.getInt("itemID");
+            float currentHighestBid = currentHighestBidsRs.getFloat("currentHighestBid");
+            if (userHighestBids.containsKey(itemID) && userHighestBids.get(itemID) < currentHighestBid) {
+                // This means the user has been outbid
+                bidAlerts.put(itemID, "higher-bid");
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title><%= username %>'s Bids/Auctions</title>
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #f8f8f8;
-        }
-        .return-link {
-            text-decoration: none;
-            color: blue;
-        }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; }
+        th { background-color: #f8f8f8; }
+        .return-link { text-decoration: none; color: blue; }
+		.higher-bid { background-color: #cceeff; } /* Light blue */
+		.outbid-auto { background-color: #ccffcc; } /* Light green */
+		.both-alerts { background-color: #e6ccff; } /* Light purple */
+        .legend { margin-top: 20px; text-align: left; }
+        .legend span { display: inline-block; width: 20px; height: 20px; margin-right: 5px; }
     </style>
+    
 </head>
 <body>
     <h1><%= username %>'s Bids/Auctions</h1>
-<table>
-    <tr>
-        <th>Type</th>
-        <th>Title</th>
-        <th>Amount</th>
-        <th>Bid Type</th> <!-- New column for Bid Type -->
-        <th>Status</th>
-        <th>Auction End Time</th>
-        <th>Action</th>
-    </tr>
-    <% for (HashMap<String, String> activity : userActivities) {
-    	String status = "Active";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date currentTime = new Date();
-        Date closeTime = sdf.parse(activity.get("closeTime"));
-        
-        if (closeTime.before(currentTime)) {
-            status = "Auction Ended";
-            if ("Bid".equals(activity.get("type"))) {
-                if ("true".equals(activity.get("isWinner"))) {
+    <table>
+        <tr>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>Bid Type</th>
+            <th>Status</th>
+            <th>Auction End Time</th>
+            <th>Action</th>
+        </tr>
+        <% for (HashMap<String, String> activity : userActivities) {
+            int itemID = Integer.parseInt(activity.get("itemID"));
+            String rowClass = bidAlerts.containsKey(itemID) ? bidAlerts.get(itemID) : "";
+            String status = "Active";
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date currentTime = new Date();
+            Date closeTime = sdf.parse(activity.get("closeTime"));
+
+            if (closeTime.before(currentTime)) {
+                status = "Auction Ended";
+                if ("Bid".equals(activity.get("type")) && "true".equals(activity.get("isWinner"))) {
                     status += " - Won";
-                } else {
-                    // Check if the user's bid is equal to the final winning bid
-                    float userBid = Float.parseFloat(activity.get("amount"));
-                    float highestBid = Float.parseFloat(activity.get("highestBid"));
-                    if (userBid == highestBid) {
-                        status += " - Lost";
-                    }
+                } else if ("Bid".equals(activity.get("type"))) {
+                    status += " - Lost";
                 }
             }
-        }
-    %>
-    
-    <tr>
-        <td><%= activity.get("type") %></td>
-    	<td><%= activity.get("title") %></td>
-    	<td><%= activity.get("amount") %></td>
-    	<td><%= activity.get("autoBid") != null && Float.parseFloat(activity.get("autoBid")) == 0 ? "Manual Bid" : (activity.get("autoBid") == null ? "N/A" : "Auto-bid, max: " + activity.get("autoBid")) %></td>
-    	<td><%= status %></td>
-    	<td><%= activity.get("closeTime") %></td>
-        <td>
-            <% if ("Bid".equals(activity.get("type"))) { %>
-                <form action="deleteBid.jsp" method="post">
-                    <input type="hidden" name="bidID" value="<%= activity.get("bidID") %>">
-                    <button type="submit">Withdraw Bid</button>
-                </form>
-            <% } else { %>
-                <form action="deleteItem.jsp" method="post">
-                    <input type="hidden" name="itemID" value="<%= activity.get("itemID") %>">
-                    <button type="submit">Delete Auction</button>
-                </form>
-            <% } %>
-        </td>
-    </tr>
-    <% } %>
-</table>
+        %>
+        <tr class="<%= rowClass %>">
+            <td><%= activity.get("type") %></td>
+            <td><%= activity.get("title") %></td>
+            <td><%= activity.get("amount") %></td>
+            <td><%= activity.get("autoBid") != null && !activity.get("autoBid").equals("0") ? "Auto-bid, max: " + activity.get("autoBid") : "Manual Bid" %></td>
+            <td><%= status %></td>
+            <td><%= activity.get("closeTime") %></td>
+            <td>
+                <% if ("Bid".equals(activity.get("type"))) { %>
+                    <form action="deleteBid.jsp" method="post">
+                        <input type="hidden" name="bidID" value="<%= activity.get("bidID") %>">
+                        <button type="submit">Withdraw Bid</button>
+                    </form>
+                <% } else { %>
+                    <form action="deleteItem.jsp" method="post">
+                        <input type="hidden" name="itemID" value="<%= activity.get("itemID") %>">
+                        <button type="submit">Delete Auction</button>
+                    </form>
+                <% } %>
+            </td>
+        </tr>
+        <% } %>
+    </table>
+
+    <div class="legend">
+        <h3>Legend:</h3>
+        <div><span class="higher-bid"></span> A higher bid has been placed on an item you've bid on.</div>
+        <div><span class="outbid-auto"></span> Your automatic bid limit has been exceeded by another bidder.</div>
+        <div><span class="both-alerts"></span> Both a higher bid has been placed and your automatic bid limit has been exceeded on an item.</div>
+    </div>
 
     <a href="<%=request.getContextPath()%>/JSP/dashboard.jsp" class="return-link">Back to Dashboard</a>
 </body>
