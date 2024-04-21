@@ -1,5 +1,5 @@
 <%@ page
-	import="java.sql.*, java.util.List, java.util.ArrayList, java.util.HashMap, java.util.Map"%>
+	import="java.sql.*, java.util.List, java.util.ArrayList, java.util.HashMap, java.util.Map, java.net.URLEncoder"%>
 <%@ page import="com.cs336.pkg.ApplicationDB"%>
 
 <%
@@ -143,6 +143,7 @@ li {
 	        Highest Bid: $<%= item.get("highestBid") %><br>
 	        Minimum Bid Increment: $<%= item.get("minBidIncrement") != null ? item.get("minBidIncrement").toString() : "N/A" %><br>
 	        Closing Time: <%= item.get("closeTime") %><br>
+	        <a href="viewSimilarItems.jsp?category=<%= item.get("category") != null ? URLEncoder.encode(item.get("category").toString(), "UTF-8") : "default_category" %>&itemID=<%= item.get("itemID") != null ? item.get("itemID").toString() : "default_id" %>" class="link-button">View Similar Items</a>
 	        <% 
 	        Integer ownerId = (Integer) item.get("ownerID");
 	        if (ownerId != null && !ownerId.equals(loggedInUserId)) {
