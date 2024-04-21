@@ -17,9 +17,10 @@ DROP TABLE IF EXISTS `alerts`;
 DROP TABLE IF EXISTS `bids`;
 DROP TABLE IF EXISTS `items`;
 DROP TABLE IF EXISTS `users`;
-DROP TABLE IF EXISTS `chat`;
 DROP TABLE IF EXISTS `messages`;
 DROP TABLE IF EXISTS `payments`;
+DROP TABLE IF EXISTS `questions`;
+DROP TABLE IF EXISTS `answers`;
 
 CREATE TABLE `users` (
   `userID` int AUTO_INCREMENT,
@@ -76,22 +77,26 @@ CREATE TABLE `alerts` (
   FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE IF NOT EXISTS `chat` (
-  `chatID` int AUTO_INCREMENT PRIMARY KEY,
-  `chatter1UserID` int NOT NULL,
-  `chatter2UserID` int NOT NULL,
-  CONSTRAINT `fk_chatter1` FOREIGN KEY (`chatter1UserID`) REFERENCES `users` (`userID`),
-  CONSTRAINT `fk_chatter2` FOREIGN KEY (`chatter2UserID`) REFERENCES `users` (`userID`)
+CREATE TABLE `questions` (
+  `questionID` int AUTO_INCREMENT,
+  `userID` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`questionID`),
+  FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE IF NOT EXISTS `messages` (
-  `messageID` int AUTO_INCREMENT PRIMARY KEY,
-  `chatID` int NOT NULL,
-  `senderUserID` int NOT NULL,
-  `message` text NOT NULL,
-  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT `fk_chatID` FOREIGN KEY (`chatID`) REFERENCES `chat` (`chatID`),
-  CONSTRAINT `fk_senderUserID` FOREIGN KEY (`senderUserID`) REFERENCES `users` (`userID`)
+CREATE TABLE `answers` (
+  `answerID` int AUTO_INCREMENT,
+  `questionID` int NOT NULL,
+  `userID` int NOT NULL,
+  `content` text NOT NULL,
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  `endorsed` boolean DEFAULT FALSE,
+  PRIMARY KEY (`answerID`),
+  FOREIGN KEY (`questionID`) REFERENCES `questions` (`questionID`),
+  FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `payments` (
@@ -110,6 +115,14 @@ CREATE TABLE IF NOT EXISTS `payments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO users (role, email, username, password) VALUES ('admin', 'admin@email.com', 'admin', 'adminpass');
+
+INSERT INTO items (userID, make, model, yom, color, description, closeTime, initialPrice, minSellPrice, minBidIncrement, category, title, balanceUpdated) 
+VALUES 
+(1, 'Toyota', 'Corolla', 2020, 'Silver', 'Low mileage, excellent condition.', '2024-12-31 23:59:59', 14000, 15000, 100, 'Car', '2020 Toyota Corolla - Silver', FALSE),
+(1, 'Honda', 'Civic', 2019, 'Red', 'Well maintained, one owner only.', '2024-12-31 23:59:59', 13000, 14000, 100, 'Car', '2019 Honda Civic - Red', FALSE),
+(1, 'Ford', 'Focus', 2018, 'Blue', 'Good condition, recent service.', '2024-12-31 23:59:59', 11000, 12000, 100, 'Car', '2018 Ford Focus - Blue', FALSE),
+(1, 'Chevrolet', 'Malibu', 2021, 'Black', 'Almost new, fully loaded.', '2024-12-31 23:59:59', 19000, 20000, 100, 'Car', '2021 Chevrolet Malibu - Black', FALSE),
+(1, 'Nissan', 'Sentra', 2022, 'White', 'Brand new condition, low mileage.', '2024-12-31 23:59:59', 17000, 18000, 100, 'Car', '2022 Nissan Sentra - White', FALSE);
 
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
