@@ -49,9 +49,35 @@
             }
         }
 
-        String userActivityQuery = "SELECT 'Bid' as activityType, b.bidAmount, b.autoBid, i.title, b.bidID, i.itemID, i.closeTime, i.closeTime <= NOW() as auctionEnded, (SELECT MAX(bidAmount) FROM bids WHERE itemID = b.itemID) as highestBid, b.userID = (SELECT userID FROM bids WHERE itemID = b.itemID ORDER BY bidAmount DESC, bidID ASC LIMIT 1) as isWinner FROM bids b INNER JOIN items i ON b.itemID = i.itemID WHERE b.userID = ? " +
-                "UNION ALL " +
-                "SELECT 'Auction' as activityType, i.initialPrice, NULL as autoBid, i.title, NULL as bidID, i.itemID, i.closeTime, i.closeTime <= NOW() as auctionEnded, (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) as highestBid, FALSE as isWinner FROM items i WHERE i.userID = ?";
+        String userActivityQuery = 
+        	    "SELECT 'Bid' as activityType, " +
+        	    "       b.bidAmount, " +
+        	    "       b.autoBid, " +
+        	    "       i.title, " +
+        	    "       b.bidID, " +
+        	    "       i.itemID, " +
+        	    "       i.closeTime, " +
+        	    "       i.minSellPrice, " +
+        	    "       i.closeTime <= NOW() as auctionEnded, " +
+        	    "       (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) as highestBid, " +
+        	    "       (SELECT userID FROM bids WHERE itemID = i.itemID AND bidAmount = (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID)) as winningUserID " +
+        	    "FROM bids b " +
+        	    "INNER JOIN items i ON b.itemID = i.itemID " +
+        	    "WHERE b.userID = ? " +
+        	    "UNION ALL " +
+        	    "SELECT 'Auction' as activityType, " +
+        	    "       i.initialPrice, " +
+        	    "       NULL as autoBid, " +
+        	    "       i.title, " +
+        	    "       NULL as bidID, " +
+        	    "       i.itemID, " +
+        	    "       i.closeTime, " +
+        	    "       i.minSellPrice, " +
+        	    "       i.closeTime <= NOW() as auctionEnded, " +
+        	    "       (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) as highestBid, " +
+        	    "       NULL as winningUserID " +
+        	    "FROM items i " +
+        	    "WHERE i.userID = ?";
         try (PreparedStatement ps = conn.prepareStatement(userActivityQuery)) {
             ps.setInt(1, userID);
             ps.setInt(2, userID);
@@ -66,7 +92,9 @@
                     activity.put("bidID", rs.getString("bidID") == null ? "N/A" : rs.getString("bidID"));
                     activity.put("auctionEnded", rs.getString("auctionEnded"));
                     activity.put("highestBid", rs.getString("highestBid") == null ? "N/A" : rs.getString("highestBid"));
-                    activity.put("isWinner", rs.getString("isWinner"));
+                    String winningUserID = rs.getString("winningUserID");  // Fetch this from the result set
+                    activity.put("winningUserID", winningUserID);
+                    activity.put("minSellPrice", rs.getString("minSellPrice"));
                     Timestamp closeTimestamp = rs.getTimestamp("closeTime");
                     String closeTimeString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(closeTimestamp);
                     activity.put("closeTime", closeTimeString);
@@ -148,13 +176,19 @@
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date currentTime = new Date();
             Date closeTime = sdf.parse(activity.get("closeTime"));
+            float highestBid = Float.parseFloat(activity.get("highestBid"));
+            float minSellPrice = Float.parseFloat(activity.get("minSellPrice"));
+            String winningUserID = activity.get("winningUserID");
 
             if (closeTime.before(currentTime)) {
-                status = "Auction Ended";
-                if ("Bid".equals(activity.get("type")) && "true".equals(activity.get("isWinner"))) {
-                    status += " - Won";
-                } else if ("Bid".equals(activity.get("type"))) {
-                    status += " - Lost";
+                if (highestBid >= minSellPrice) {
+                    if (winningUserID != null && winningUserID.equals(String.valueOf(userID))) {
+                        status = "Auction Ended - Won";
+                    } else {
+                        status = "Auction Ended - Lost";
+                    }
+                } else {
+                    status = "Auction Ended - No Winners";
                 }
             }
         %>

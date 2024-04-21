@@ -21,7 +21,7 @@ if (newSearchQuery != null && !newSearchQuery.isEmpty()) {
 
 	try (Connection conn = new ApplicationDB().getConnection()) {
 		String sql = "SELECT i.itemID, i.title, i.initialPrice, i.userID AS ownerID, (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) AS highestBid, i.closeTime, i.minSellPrice, i.minBidIncrement "
-		+ "FROM Items i WHERE i.title LIKE ? ORDER BY " + sortBy + " " + order;
+			    + "FROM Items i WHERE i.title LIKE ? AND i.closeTime > NOW() ORDER BY " + sortBy + " " + order;
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		stmt.setString(1, "%" + newSearchQuery + "%");
 		ResultSet rs = stmt.executeQuery();
