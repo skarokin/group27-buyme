@@ -27,7 +27,7 @@ if (newSearchQuery == null || newSearchQuery.isEmpty()) {
 
 if (newSearchQuery != null && !newSearchQuery.isEmpty()) {
     try (Connection conn = new ApplicationDB().getConnection()) {
-        String sql = "SELECT i.itemID, i.title, i.initialPrice, i.userID AS ownerID, (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) AS highestBid, i.closeTime, i.minSellPrice, i.minBidIncrement "
+        String sql = "SELECT i.itemID, i.title, i.initialPrice, i.category, i.userID AS ownerID, (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) AS highestBid, i.closeTime, i.minSellPrice, i.minBidIncrement "
             + "FROM Items i WHERE i.title LIKE ? AND i.closeTime > NOW() ORDER BY " + sortBy + " " + order;
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, "%" + newSearchQuery + "%");
@@ -41,6 +41,7 @@ if (newSearchQuery != null && !newSearchQuery.isEmpty()) {
             row.put("highestBid", rs.getFloat("highestBid"));
             row.put("closeTime", rs.getString("closeTime"));
             row.put("ownerID", rs.getInt("ownerID"));
+            row.put("category", rs.getString("category"));
             row.put("minBidIncrement", rs.getFloat("minBidIncrement"));
             searchResults.add(row);
         }
