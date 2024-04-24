@@ -3,34 +3,33 @@
 <head>
     <title>Bid Withdrawn Successfully</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-            text-align: center;
-        }
-        .message {
-            background-color: #dff0d8;
-            color: #3c763d;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #d6e9c6;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        a {
-            display: inline-block;
-            background-color: #337ab7;
-            color: white;
-            padding: 10px 15px;
-            margin: 5px;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-        a:hover {
-            background-color: #286090;
-        }
+body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #ffffff; 
+        color: #000000; 
+        text-align: center;
+    }
+    .message, .error {
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 0;
+        display: inline-block;
+        border: 1px solid #000;
+    }
+    a {
+        display: inline-block;
+        background-color: #ffffff;
+        color: #000000;
+        padding: 10px 15px;
+        margin: 5px;
+        text-decoration: none;
+        border: 1px solid #000;
+    }
+    a:hover {
+        background-color: #f0f0f0;
+    }
     </style>
 </head>
 <body>
