@@ -92,7 +92,7 @@
                     activity.put("bidID", rs.getString("bidID") == null ? "N/A" : rs.getString("bidID"));
                     activity.put("auctionEnded", rs.getString("auctionEnded"));
                     activity.put("highestBid", rs.getString("highestBid") == null ? "N/A" : rs.getString("highestBid"));
-                    String winningUserID = rs.getString("winningUserID");  // Fetch this from the result set
+                    String winningUserID = rs.getString("winningUserID");
                     activity.put("winningUserID", winningUserID);
                     activity.put("minSellPrice", rs.getString("minSellPrice"));
                     Timestamp closeTimestamp = rs.getTimestamp("closeTime");
@@ -176,8 +176,25 @@
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date currentTime = new Date();
             Date closeTime = sdf.parse(activity.get("closeTime"));
-            float highestBid = Float.parseFloat(activity.get("highestBid"));
-            float minSellPrice = Float.parseFloat(activity.get("minSellPrice"));
+            float highestBid = 0.0f;
+            String highestBidStr = activity.get("highestBid");
+            if (highestBidStr != null && !highestBidStr.equals("N/A")) {
+                try {
+                    highestBid = Float.parseFloat(highestBidStr);
+                } catch (NumberFormatException e) {
+                    highestBid = 0.0f;
+                }
+            }
+
+            float minSellPrice = 0.0f;
+            String minSellPriceStr = activity.get("minSellPrice");
+            if (minSellPriceStr != null && !minSellPriceStr.equals("N/A")) {
+                try {
+                    minSellPrice = Float.parseFloat(minSellPriceStr);
+                } catch (NumberFormatException e) {
+                    minSellPrice = 0.0f;
+                }
+            }
             String winningUserID = activity.get("winningUserID");
 
             if (closeTime.before(currentTime)) {
