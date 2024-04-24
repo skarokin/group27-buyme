@@ -86,7 +86,7 @@
             </form>
         </div>
     <% } %>
-
+    
     <% if ("admin".equals(userRole)) { %>
         <div class="section">
             <a href="<%=request.getContextPath()%>/JSP/modifyUserInfo.jsp" class="link-button">Modify User Info</a>
@@ -94,6 +94,12 @@
             <a href="<%=request.getContextPath()%>/JSP/generateReports.jsp" class="link-button">Generate Reports</a>
         </div>
     <% } %>
+    
+    <% if ("custRep".equals(userRole)) { %>
+    <div class="section">
+        <a href="<%=request.getContextPath()%>/JSP/modifyUserInfo.jsp" class="link-button">Modify User Info</a>
+    </div>
+<% } %>
     
     <% if (!"custRep".equals(userRole) && !"admin".equals(userRole)) { %>
         <div class="section">
