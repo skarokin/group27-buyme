@@ -31,7 +31,7 @@ public class ApplicationDB {
 		}
 		try {
 			//Create a connection to your DB (FOR SEAN and SUMEDH: password is 'password')
-			connection = DriverManager.getConnection(connectionUrl,"root", "chuo0509");
+			connection = DriverManager.getConnection(connectionUrl,"root", "password");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
