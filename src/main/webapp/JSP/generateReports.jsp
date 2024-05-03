@@ -96,7 +96,7 @@
         <%
 
         // Earnings Per End-User
-        String earningsPerEndUserQuery = "SELECT users.username, SUM(bids.bidAmount) AS totalEarnings FROM users JOIN bids ON users.userID = bids.userID GROUP BY users.userID";
+        String earningsPerEndUserQuery = "SELECT u.userID, u.username, COALESCE(SUM(IF(i.finalBid >= i.minSellPrice, i.finalBid, 0)), 0) AS totalEarnings FROM users u LEFT JOIN (SELECT i.userID, i.itemID, MAX(b.bidAmount) AS finalBid, i.minSellPrice FROM items i LEFT JOIN bids b ON i.itemID = b.itemID GROUP BY i.itemID, i.userID, i.minSellPrice) AS i ON u.userID = i.userID GROUP BY u.userID, u.username;";
         PreparedStatement psEarningsPerEndUser = conn.prepareStatement(earningsPerEndUserQuery);
         ResultSet rsEarningsPerEndUser = psEarningsPerEndUser.executeQuery();
         %>
