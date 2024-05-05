@@ -17,9 +17,6 @@ DROP TABLE IF EXISTS `alerts`;
 DROP TABLE IF EXISTS `bids`;
 DROP TABLE IF EXISTS `items`;
 DROP TABLE IF EXISTS `users`;
-DROP TABLE IF EXISTS `chat`;
-DROP TABLE IF EXISTS `messages`;
-DROP TABLE IF EXISTS `payments`;
 DROP TABLE IF EXISTS `questions`;
 DROP TABLE IF EXISTS `answers`;
 
@@ -99,21 +96,6 @@ CREATE TABLE `answers` (
   PRIMARY KEY (`answerID`),
   FOREIGN KEY (`questionID`) REFERENCES `questions` (`questionID`),
   FOREIGN KEY (`userID`) REFERENCES `users` (`userID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE IF NOT EXISTS `payments` (
-  `paymentID` int AUTO_INCREMENT,
-  `transactionID` int NOT NULL,
-  `itemID` int NOT NULL,
-  `buyerID` int NOT NULL,
-  `sellerID` int NOT NULL,
-  `paymentAmount` float NOT NULL,
-  `paymentDate` datetime NOT NULL,
-  PRIMARY KEY (`paymentID`),
-  FOREIGN KEY (`transactionID`) REFERENCES `transactions`(`transactionID`),
-  FOREIGN KEY (`itemID`) REFERENCES `items`(`itemID`),
-  FOREIGN KEY (`buyerID`) REFERENCES `users`(`userID`),
-  FOREIGN KEY (`sellerID`) REFERENCES `users`(`userID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO users (role, email, username, password) VALUES ('admin', 'admin@email.com', 'admin', 'adminpass');

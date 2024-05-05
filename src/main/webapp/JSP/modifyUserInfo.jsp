@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*, java.util.HashMap, java.util.ArrayList"%>
+<%@ page import="java.sql.*, java.util.HashMap, java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.cs336.pkg.ApplicationDB" %>
 <!DOCTYPE html>
@@ -53,40 +53,76 @@
     <%
     String searchQuery = request.getParameter("search");
     if (searchQuery != null && !searchQuery.isEmpty()) {
-        try (Connection conn = new ApplicationDB().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = new ApplicationDB().getConnection();
             String query = "SELECT userID, username, email FROM users WHERE username LIKE ? AND role = 'user'";
-            try (PreparedStatement ps = conn.prepareStatement(query)) {
-                ps.setString(1, "%" + searchQuery + "%");
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        int userId = rs.getInt("userID");
-                        String username = rs.getString("username");
-                        String email = rs.getString("email");
-                        %>
-                        <div class="user-entry">
-                            <a href="<%=request.getContextPath()%>/JSP/userAuctionsBids.jsp?userID=<%= userId %>" class="user-link"><%= username %></a> (<%= email %>)
-                            <form action="" method="post" style="display: inline;">
-                                <input type="hidden" name="userID" value="<%= userId %>">
-                                <input type="hidden" name="action" value="reset">
-                                New Password: <input type="password" name="newPassword" required>
-                                <button type="submit" class="reset-button">Reset Password</button>
-                            </form>
-                            <% if ("custRep".equals(session.getAttribute("userRole")) || "admin".equals(session.getAttribute("userRole"))) { %>
-                                <form action="" method="post" style="display: inline;">
-                                    <input type="hidden" name="userID" value="<%= userId %>">
-                                    <input type="hidden" name="action" value="updateEmail">
-                                    New Email: <input type="email" name="newEmail" required>
-                                    <button type="submit" class="action-button">Update Email</button>
-                                </form>
-                            <% } %>
-                        </div>
-                        <%
-                    }
-                }
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setString(1, "%" + searchQuery + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int userId = rs.getInt("userID");
+                String username = rs.getString("username");
+                String email = rs.getString("email");
+                %>
+                <div class="user-entry">
+                    <a href="<%=request.getContextPath()%>/JSP/userAuctionsBids.jsp?userID=<%= userId %>" class="user-link"><%= username %></a> (<%= email %>)
+                    <form action="" method="post">
+                        <input type="hidden" name="userID" value="<%= userId %>">
+                        <input type="hidden" name="action" value="resetPassword">
+                        New Password: <input type="password" name="newPassword" required>
+                        <button type="submit" class="reset-button">Reset Password</button>
+                    </form>
+                    <% if ("custRep".equals(session.getAttribute("userRole")) || "admin".equals(session.getAttribute("userRole"))) { %>
+                        <form action="" method="post">
+                            <input type="hidden" name="userID" value="<%= userId %>">
+                            <input type="hidden" name="action" value="updateEmail">
+                            New Email: <input type="email" name="newEmail" required>
+                            <button type="submit" class="action-button">Update Email</button>
+                        </form>
+                    <% } %>
+                </div>
+                <%
             }
+            rs.close();
+            ps.close();
         } catch (SQLException e) {
             e.printStackTrace();
             out.println("<p>Error during the search. Please try again.</p>");
+        } finally {
+            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+
+    // Handle post requests for password and email updates
+    String action = request.getParameter("action");
+    if ("resetPassword".equals(action)) {
+        String newPassword = request.getParameter("newPassword");
+        int userID = Integer.parseInt(request.getParameter("userID"));
+        try (Connection conn = new ApplicationDB().getConnection()) {
+            String updateQuery = "UPDATE users SET password = ? WHERE userID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updateQuery)) {
+                ps.setString(1, newPassword);
+                ps.setInt(2, userID);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            out.println("<p>Error updating password. Please try again.</p>");
+        }
+    } else if ("updateEmail".equals(action)) {
+        String newEmail = request.getParameter("newEmail");
+        int userID = Integer.parseInt(request.getParameter("userID"));
+        try (Connection conn = new ApplicationDB().getConnection()) {
+            String updateQuery = "UPDATE users SET email = ? WHERE userID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updateQuery)) {
+                ps.setString(1, newEmail);
+                ps.setInt(2, userID);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            out.println("<p>Error updating email. Please try again.</p>");
         }
     }
     %>
