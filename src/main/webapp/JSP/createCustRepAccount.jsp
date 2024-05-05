@@ -46,14 +46,14 @@
         if ("POST".equalsIgnoreCase(request.getMethod())) {
             String email = request.getParameter("email");
             String username = request.getParameter("username");
-            String password = request.getParameter("password"); // Consider hashing this in a real application
+            String password = request.getParameter("password");
             
             try (Connection conn = new ApplicationDB().getConnection()) {
                 String insertQuery = "INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, 'custRep')";
                 try (PreparedStatement ps = conn.prepareStatement(insertQuery)) {
                     ps.setString(1, email);
                     ps.setString(2, username);
-                    ps.setString(3, password); // In a real application, ensure this is securely hashed
+                    ps.setString(3, password);
                     ps.executeUpdate();
                     out.println("<p>Customer Representative Account Created Successfully.</p>");
                 }

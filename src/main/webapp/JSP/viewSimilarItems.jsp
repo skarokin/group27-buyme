@@ -2,19 +2,16 @@
 <%@ page import="com.cs336.pkg.ApplicationDB"%>
 
 <%
-    // Retrieve category and itemID from the request to find similar items
     String category = request.getParameter("category");
     String currentItemID = request.getParameter("itemID");
     List<Map<String, Object>> similarItems = new ArrayList<>();
 
     if (category != null && currentItemID != null) {
         try (Connection conn = new ApplicationDB().getConnection()) {
-            // The SQL query should not exclude the current itemID to just find items in the same category
             String query = "SELECT i.itemID, i.title, i.initialPrice, i.category, i.closeTime FROM Items i "
                          + "WHERE i.category = ? AND i.closeTime BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()";
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setString(1, category);
-                // ps.setInt(2, Integer.parseInt(currentItemID)); This line should be removed as we are not excluding current itemID
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Map<String, Object> item = new HashMap<>();

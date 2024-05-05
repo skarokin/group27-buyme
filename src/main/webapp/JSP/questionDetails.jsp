@@ -11,7 +11,6 @@
     Connection conn = null;
     try {
         conn = new ApplicationDB().getConnection();
-        // Fetch question details
         String questionSQL = "SELECT title, content FROM questions WHERE questionID = ?";
         PreparedStatement questionStmt = conn.prepareStatement(questionSQL);
         questionStmt.setInt(1, questionId);
@@ -23,7 +22,6 @@
         qrs.close();
         questionStmt.close();
 
-        // Fetch answers
         String answersSQL = "SELECT a.answerID, a.content, a.timestamp, a.endorsed, u.username FROM answers a JOIN users u ON a.userId = u.userID WHERE questionID = ? ORDER BY a.timestamp ASC";
         PreparedStatement answersStmt = conn.prepareStatement(answersSQL);
         answersStmt.setInt(1, questionId);

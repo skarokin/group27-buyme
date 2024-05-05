@@ -91,7 +91,6 @@ try (Connection conn = new ApplicationDB().getConnection()) {
 
 Map<Integer, String> bidAlerts = new HashMap<>();
 try (Connection conn = new ApplicationDB().getConnection()) {
-	// Query to find the highest bid for each item the user has bid on
 	String userHighestBidsQuery = "SELECT b.itemID, MAX(b.bidAmount) AS userHighestBid "
 	+ "FROM bids b WHERE b.userID = ? GROUP BY b.itemID";
 	PreparedStatement userHighestBidsStmt = conn.prepareStatement(userHighestBidsQuery);
@@ -103,7 +102,6 @@ try (Connection conn = new ApplicationDB().getConnection()) {
 		userHighestBids.put(userHighestBidsRs.getInt("itemID"), userHighestBidsRs.getFloat("userHighestBid"));
 	}
 
-	// Query to find the current highest bids
 	String currentHighestBidsQuery = "SELECT b.itemID, MAX(b.bidAmount) AS currentHighestBid "
 	+ "FROM bids b GROUP BY b.itemID";
 	PreparedStatement currentHighestBidsStmt = conn.prepareStatement(currentHighestBidsQuery);
@@ -113,7 +111,6 @@ try (Connection conn = new ApplicationDB().getConnection()) {
 		int itemID = currentHighestBidsRs.getInt("itemID");
 		float currentHighestBid = currentHighestBidsRs.getFloat("currentHighestBid");
 		if (userHighestBids.containsKey(itemID) && userHighestBids.get(itemID) < currentHighestBid) {
-	// This means the user has been outbid
 	bidAlerts.put(itemID, "higher-bid");
 		}
 	}

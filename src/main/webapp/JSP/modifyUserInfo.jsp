@@ -94,7 +94,6 @@
         }
     }
 
-    // Handle post requests for password and email updates
     String action = request.getParameter("action");
     if ("resetPassword".equals(action)) {
         String newPassword = request.getParameter("newPassword");

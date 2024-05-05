@@ -43,7 +43,6 @@
     <h1>Summary Sales Reports</h1>
     <% 
     try (Connection conn = new ApplicationDB().getConnection()) {
-        // Total Earnings Query
         String totalEarningsQuery = "SELECT SUM(highestBid) AS totalEarnings FROM (SELECT MAX(bidAmount) AS highestBid FROM bids INNER JOIN items ON bids.itemID = items.itemID GROUP BY bids.itemID) AS bidSum";
         PreparedStatement psTotalEarnings = conn.prepareStatement(totalEarningsQuery);
         ResultSet rsTotalEarnings = psTotalEarnings.executeQuery();
@@ -53,7 +52,6 @@
             <%
         }
 
-        // Earnings per Item
         String earningsPerItemQuery = "SELECT items.title, MAX(bids.bidAmount) AS highestBid FROM bids INNER JOIN items ON bids.itemID = items.itemID GROUP BY bids.itemID";
         PreparedStatement psEarningsPerItem = conn.prepareStatement(earningsPerItemQuery);
         ResultSet rsEarningsPerItem = psEarningsPerItem.executeQuery();
@@ -75,7 +73,6 @@
             %>
         </table>
         <%
-        // Earnings Per Item Type
         String earningsPerItemTypeQuery = "SELECT items.category, SUM(bids.bidAmount) AS totalEarnings FROM items JOIN bids ON items.itemID = bids.itemID GROUP BY items.category";
         PreparedStatement psEarningsPerItemType = conn.prepareStatement(earningsPerItemTypeQuery);
         ResultSet rsEarningsPerItemType = psEarningsPerItemType.executeQuery();
@@ -95,7 +92,6 @@
         </table>
         <%
 
-        // Earnings Per End-User
         String earningsPerEndUserQuery = "SELECT u.userID, u.username, COALESCE(SUM(IF(i.finalBid >= i.minSellPrice, i.finalBid, 0)), 0) AS totalEarnings FROM users u LEFT JOIN (SELECT i.userID, i.itemID, MAX(b.bidAmount) AS finalBid, i.minSellPrice FROM items i LEFT JOIN bids b ON i.itemID = b.itemID GROUP BY i.itemID, i.userID, i.minSellPrice) AS i ON u.userID = i.userID GROUP BY u.userID, u.username;";
         PreparedStatement psEarningsPerEndUser = conn.prepareStatement(earningsPerEndUserQuery);
         ResultSet rsEarningsPerEndUser = psEarningsPerEndUser.executeQuery();
@@ -115,7 +111,6 @@
         </table>
         <%
 
-        // Best-Selling Items
         String bestSellingItemsQuery = "SELECT items.title, MAX(bids.bidAmount) AS highestBid FROM items JOIN bids ON items.itemID = bids.itemID GROUP BY items.itemID ORDER BY highestBid DESC LIMIT 5";
         PreparedStatement psBestSellingItems = conn.prepareStatement(bestSellingItemsQuery);
         ResultSet rsBestSellingItems = psBestSellingItems.executeQuery();
@@ -135,7 +130,6 @@
         </table>
         <%
 
-        // End-Users With Most Spending
         String topSpendingUsersQuery = "SELECT users.username, SUM(bids.bidAmount) AS totalSpent FROM users JOIN bids ON users.userID = bids.userID GROUP BY users.userID ORDER BY totalSpent DESC LIMIT 5";
         PreparedStatement psTopSpendingUsers = conn.prepareStatement(topSpendingUsersQuery);
         ResultSet rsTopSpendingUsers = psTopSpendingUsers.executeQuery();

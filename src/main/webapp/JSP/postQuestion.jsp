@@ -14,7 +14,7 @@
             stmt.setInt(3, (Integer) session.getAttribute("userID"));
             stmt.executeUpdate();
             stmt.close();
-            response.sendRedirect("qaBoard.jsp"); // Redirect to main Q&A page after question submission
+            response.sendRedirect("qaBoard.jsp");
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -53,7 +53,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             width: calc(50% - 22px);
-            max-width: 300px;  // Adjusts width of input and textarea for smaller screens
+            max-width: 300px;
         }
     </style>
 </head>

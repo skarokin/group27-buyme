@@ -9,7 +9,6 @@
     Connection conn = null;
     try {
         conn = new ApplicationDB().getConnection();
-        // Fetch the question details to display
         String fetchQuestion = "SELECT title, content FROM questions WHERE questionID = ?";
         PreparedStatement questionStmt = conn.prepareStatement(fetchQuestion);
         questionStmt.setInt(1, questionId);
@@ -19,9 +18,8 @@
             questionContent = rs.getString("content");
         }
         rs.close();
-        questionStmt.close();
+        questionStmt.close(); 
 
-        // Handling POST request for answering a question
         if ("POST".equalsIgnoreCase(request.getMethod()) && answerContent != null && !answerContent.trim().isEmpty()) {
             String sql = "INSERT INTO answers (questionId, content, userId, timestamp) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -30,7 +28,7 @@
             stmt.setInt(3, (Integer) session.getAttribute("userID"));
             stmt.executeUpdate();
             stmt.close();
-            response.sendRedirect("questionDetails.jsp?id=" + questionId); // Redirect back to the question details
+            response.sendRedirect("questionDetails.jsp?id=" + questionId);
         }
     } catch (SQLException e) {
         e.printStackTrace();
@@ -69,7 +67,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             width: 50%;
-            min-width: 300px;  // Ensures the textarea is not too small on smaller screens
+            min-width: 300px;
             height: 150px;
         }
     </style>

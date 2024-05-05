@@ -25,7 +25,6 @@ if (bidId > 0 && userId != null) {
         if (rowsAffected > 0) {
             response.sendRedirect("deleteBidSuccess.jsp");
         } else {
-            // Handle the case where the bid was not found or not owned by the user
             response.sendRedirect("error.jsp?message=Unable to delete bid");
         }
     } catch (SQLException e) {

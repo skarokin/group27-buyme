@@ -12,7 +12,7 @@
             stmt.setInt(1, answerID);
             stmt.executeUpdate();
             stmt.close();
-            response.sendRedirect("questionDetails.jsp?id=" + questionID); // Redirect back to the question details
+            response.sendRedirect("questionDetails.jsp?id=" + questionID);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

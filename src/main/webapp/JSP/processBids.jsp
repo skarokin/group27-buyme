@@ -28,7 +28,6 @@ try {
     float autoBidLimit = autoBidLimitStr != null && !autoBidLimitStr.isEmpty() ? Float.parseFloat(autoBidLimitStr) : 0;
     float autoBidIncrement = autoBidIncrementStr != null && !autoBidIncrementStr.isEmpty() ? Float.parseFloat(autoBidIncrementStr) : 0;
 
-    // Fetch the maximum bid, initial price, and minBidIncrement for the item
     String bidInfoQuery = "SELECT COALESCE(MAX(b.bidAmount), i.initialPrice) AS maxBid, i.initialPrice, i.minBidIncrement FROM items i LEFT JOIN bids b ON b.itemID = i.itemID WHERE i.itemID = ? GROUP BY i.itemID";
     stmt = conn.prepareStatement(bidInfoQuery);
     stmt.setInt(1, itemIDToBid);
@@ -42,7 +41,6 @@ try {
     }
 
     if (bidAmount >= maxBid + minBidIncrement) {
-        // Insert the new bid
         String insertBidQuery = "INSERT INTO Bids (itemId, userId, bidDate, bidAmount, autoBid, autoBidIncrement) VALUES (?, ?, ?, ?, ?, ?)";
         stmt = conn.prepareStatement(insertBidQuery);
         stmt.setInt(1, itemIDToBid);
@@ -55,8 +53,6 @@ try {
         stmt.setFloat(6, autoBidIncrement);
         stmt.executeUpdate();
 
-	     // AUTO-BIDDING LOGIC STARTS HERE
-	     // Check for other auto-bids that must be updated due to this bid
 	     String autoBidsQuery = "SELECT userId, autoBid, autoBidIncrement FROM Bids WHERE itemId = ? AND userId != ? AND autoBid >= ?";
 	     PreparedStatement autoBidsStmt = conn.prepareStatement(autoBidsQuery);
 	     autoBidsStmt.setInt(1, itemIDToBid);
@@ -70,7 +66,6 @@ try {
 	         float userAutoBidIncrement = autoBidsRs.getFloat("autoBidIncrement");
 	         if (userAutoBidLimit > bidAmount) {
 	             float newBidAmount = Math.min(bidAmount + userAutoBidIncrement, userAutoBidLimit);
-	             // Update existing auto-bid record with new bid amount
 	             String updateAutoBidQuery = "UPDATE Bids SET bidDate = ?, bidAmount = ? WHERE itemId = ? AND userId = ?";
 	             PreparedStatement updateAutoBidStmt = conn.prepareStatement(updateAutoBidQuery);
 	             updateAutoBidStmt.setString(1, dateFormat.format(new Date()));
@@ -80,9 +75,8 @@ try {
 	             updateAutoBidStmt.executeUpdate();
 	         }
 	     }
-	     // AUTO-BIDDING LOGIC ENDS HERE
 
-        response.sendRedirect("searchItems.jsp"); // Redirect to search or dashboard page
+        response.sendRedirect("searchItems.jsp");
     } else {
         errorMessage = "Your bid must be higher than the current highest bid plus the minimum bid increment of $" + minBidIncrement;
     }
