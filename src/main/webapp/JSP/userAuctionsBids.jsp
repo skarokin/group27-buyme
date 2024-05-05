@@ -54,7 +54,7 @@ try (Connection conn = new ApplicationDB().getConnection()) {
 	+ "       i.title, " + "       b.bidID, " + "       i.itemID, " + "       i.closeTime, "
 	+ "       i.minSellPrice, " + "       i.closeTime <= NOW() as auctionEnded, "
 	+ "       (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID) as highestBid, "
-	+ "       (SELECT userID FROM bids WHERE itemID = i.itemID AND bidAmount = (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID)) as winningUserID "
+	+ "       (SELECT MIN(userID) FROM bids WHERE itemID = i.itemID AND bidAmount = (SELECT MAX(bidAmount) FROM bids WHERE itemID = i.itemID)) as winningUserID "
 	+ "FROM bids b " + "INNER JOIN items i ON b.itemID = i.itemID " + "WHERE b.userID = ? " + "UNION ALL "
 	+ "SELECT 'Auction' as activityType, " + "       i.initialPrice, " + "       NULL as autoBid, "
 	+ "       i.title, " + "       NULL as bidID, " + "       i.itemID, " + "       i.closeTime, "

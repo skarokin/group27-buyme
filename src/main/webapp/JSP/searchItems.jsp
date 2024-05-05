@@ -145,7 +145,36 @@ li {
             Highest Bid: $<%= item.get("highestBid") %><br>
             Minimum Bid Increment: $<%= item.get("minBidIncrement") != null ? item.get("minBidIncrement").toString() : "N/A" %><br>
             Closing Time: <%= item.get("closeTime") %><br>
-            <!-- Links and other actions related to item can be added here -->
+            <a href="viewSimilarItems.jsp?category=<%= item.get("category") != null ? URLEncoder.encode(item.get("category").toString(), "UTF-8") : "default_category" %>&itemID=<%= item.get("itemID") != null ? item.get("itemID").toString() : "default_id" %>" class="link-button">View Similar Items</a>
+	        <% 
+	        Integer ownerId = (Integer) item.get("ownerID");
+	        if (ownerId != null && !ownerId.equals(loggedInUserId)) {
+	        %>
+	        <form action="processBids.jsp" method="post">
+		        <script>
+					function checkAutoBidLimit() {
+					    var autoBidLimit = document.getElementById("autoBidLimit");
+					    var autoBidIncrement = document.getElementById("autoBidIncrement");
+					    if (autoBidLimit.value != "") {
+					        userAutoBidIncrement.required = true;
+					    } else {
+					        userAutoBidIncrement.required = false;
+					    }
+					}
+				</script>
+	            <input type="hidden" name="itemIDToBid" value="<%= item.get("itemID") %>">
+	            Bid Amount: <input type="number" name="bidAmount" class="form-input" step="0.01" required><br>
+	            Auto-Bid Limit: <input type="number" name="autoBidLimit" class="form-input" step="0.01" placeholder="Optional: Your max limit"><br>
+	            Auto-Bid Increment: <input type="number" name="autoBidIncrement" class="form-input" step="0.01" placeholder="Required if auto-bid limit is set">
+	            <input type="submit" class="form-button" value="Place Bid">
+	        </form>
+	        <% } else { %>
+	        <form action="deleteItem.jsp" method="post">
+	            <input type="hidden" name="itemID" value="<%= item.get("itemID") %>">
+	            <input type="submit" class="form-button" value="Delete Listing" onclick="return confirm('Are you sure you want to delete this listing?');">
+	        </form>
+	        <% } %>
+	        <a href="viewBidHistory.jsp?itemID=<%= item.get("itemID") %>" class="link-button">View Bids</a>
         </li>
         <%
         }

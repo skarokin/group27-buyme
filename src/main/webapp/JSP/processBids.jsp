@@ -13,7 +13,9 @@ if (loggedInUserId == null) {
 String itemIDToBidStr = request.getParameter("itemIDToBid");
 String bidAmountStr = request.getParameter("bidAmount");
 String autoBidLimitStr = request.getParameter("autoBidLimit");
+String autoBidIncrementStr = request.getParameter("autoBidIncrement");
 String errorMessage = null;
+
 
 Connection conn = null;
 PreparedStatement stmt = null;
@@ -24,6 +26,7 @@ try {
     int itemIDToBid = Integer.parseInt(itemIDToBidStr);
     float bidAmount = Float.parseFloat(bidAmountStr);
     float autoBidLimit = autoBidLimitStr != null && !autoBidLimitStr.isEmpty() ? Float.parseFloat(autoBidLimitStr) : 0;
+    float autoBidIncrement = autoBidIncrementStr != null && !autoBidIncrementStr.isEmpty() ? Float.parseFloat(autoBidIncrementStr) : 0;
 
     // Fetch the maximum bid, initial price, and minBidIncrement for the item
     String bidInfoQuery = "SELECT COALESCE(MAX(b.bidAmount), i.initialPrice) AS maxBid, i.initialPrice, i.minBidIncrement FROM items i LEFT JOIN bids b ON b.itemID = i.itemID WHERE i.itemID = ? GROUP BY i.itemID";
@@ -40,7 +43,7 @@ try {
 
     if (bidAmount >= maxBid + minBidIncrement) {
         // Insert the new bid
-        String insertBidQuery = "INSERT INTO Bids (itemId, userId, bidDate, bidAmount, autoBid) VALUES (?, ?, ?, ?, ?)";
+        String insertBidQuery = "INSERT INTO Bids (itemId, userId, bidDate, bidAmount, autoBid, autoBidIncrement) VALUES (?, ?, ?, ?, ?, ?)";
         stmt = conn.prepareStatement(insertBidQuery);
         stmt.setInt(1, itemIDToBid);
         stmt.setInt(2, loggedInUserId);
@@ -49,32 +52,35 @@ try {
         stmt.setString(3, currentDate);
         stmt.setFloat(4, bidAmount);
         stmt.setFloat(5, autoBidLimit);
+        stmt.setFloat(6, autoBidIncrement);
         stmt.executeUpdate();
 
-        // AUTO-BIDDING LOGIC STARTS HERE
-        // Check for other auto-bids that must be updated due to this bid
-        String autoBidsQuery = "SELECT userId, autoBid FROM Bids WHERE itemId = ? AND userId != ? AND autoBid >= ?";
-        PreparedStatement autoBidsStmt = conn.prepareStatement(autoBidsQuery);
-        autoBidsStmt.setInt(1, itemIDToBid);
-        autoBidsStmt.setInt(2, loggedInUserId);
-        autoBidsStmt.setFloat(3, bidAmount);
-        ResultSet autoBidsRs = autoBidsStmt.executeQuery();
-        while (autoBidsRs.next()) {
-            int autoBidUserId = autoBidsRs.getInt("userId");
-            float userAutoBidLimit = autoBidsRs.getFloat("autoBid");
-            if (userAutoBidLimit > bidAmount) {
-                float newBidAmount = Math.min(bidAmount + minBidIncrement, userAutoBidLimit);
-                String newAutoBidQuery = "INSERT INTO Bids (itemId, userId, bidDate, bidAmount, autoBid) VALUES (?, ?, ?, ?, ?)";
-                PreparedStatement newAutoBidStmt = conn.prepareStatement(newAutoBidQuery);
-                newAutoBidStmt.setInt(1, itemIDToBid);
-                newAutoBidStmt.setInt(2, autoBidUserId);
-                newAutoBidStmt.setString(3, dateFormat.format(new Date()));
-                newAutoBidStmt.setFloat(4, newBidAmount);
-                newAutoBidStmt.setFloat(5, userAutoBidLimit); // Maintain the original autoBid limit
-                newAutoBidStmt.executeUpdate();
-            }
-        }
-        // AUTO-BIDDING LOGIC ENDS HERE
+	     // AUTO-BIDDING LOGIC STARTS HERE
+	     // Check for other auto-bids that must be updated due to this bid
+	     String autoBidsQuery = "SELECT userId, autoBid, autoBidIncrement FROM Bids WHERE itemId = ? AND userId != ? AND autoBid >= ?";
+	     PreparedStatement autoBidsStmt = conn.prepareStatement(autoBidsQuery);
+	     autoBidsStmt.setInt(1, itemIDToBid);
+	     autoBidsStmt.setInt(2, loggedInUserId);
+	     autoBidsStmt.setFloat(3, bidAmount);
+	     ResultSet autoBidsRs = autoBidsStmt.executeQuery();
+	
+	     while (autoBidsRs.next()) {
+	         int autoBidUserId = autoBidsRs.getInt("userId");
+	         float userAutoBidLimit = autoBidsRs.getFloat("autoBid");
+	         float userAutoBidIncrement = autoBidsRs.getFloat("autoBidIncrement");
+	         if (userAutoBidLimit > bidAmount) {
+	             float newBidAmount = Math.min(bidAmount + userAutoBidIncrement, userAutoBidLimit);
+	             // Update existing auto-bid record with new bid amount
+	             String updateAutoBidQuery = "UPDATE Bids SET bidDate = ?, bidAmount = ? WHERE itemId = ? AND userId = ?";
+	             PreparedStatement updateAutoBidStmt = conn.prepareStatement(updateAutoBidQuery);
+	             updateAutoBidStmt.setString(1, dateFormat.format(new Date()));
+	             updateAutoBidStmt.setFloat(2, newBidAmount);
+	             updateAutoBidStmt.setInt(3, itemIDToBid);
+	             updateAutoBidStmt.setInt(4, autoBidUserId);
+	             updateAutoBidStmt.executeUpdate();
+	         }
+	     }
+	     // AUTO-BIDDING LOGIC ENDS HERE
 
         response.sendRedirect("searchItems.jsp"); // Redirect to search or dashboard page
     } else {
